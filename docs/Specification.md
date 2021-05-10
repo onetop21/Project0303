@@ -36,6 +36,9 @@
 * Flutter
 * Python
  * FastAPI
+  * OAuth2 (Google?)
+ * UVicorn
+* Redis (Cache)
 * Mongo DB
 * MinIO
 * Docker
@@ -43,4 +46,3 @@
 ## API
 * 회원가입
 * 로그인
-* 
