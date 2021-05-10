@@ -29,7 +29,7 @@
 * 웹애플리케이션
 
 ## 아키텍처
-![Diagram](https://viewer.diagrams.net/?target=blank&highlight=0000ff&edit=_blank&layers=1&nav=1&title=archeture#RjZJNa4QwEIZ%2FTY6FqFuXHlvX3V4KBRfaW0nNrAlEIzGu2l%2FfWCd%2BsCwUPMw885HxnSFRUvYnw2rxpjkoElLek%2BhAwjDYhSEZP8qHieyfdhMojOSYtIBM%2FgBCirSVHJpNotVaWVlvYa6rCnK7YcwY3W3TLlptX61ZATcgy5m6pR%2BSW4E0pnQJvIIshH869JGS%2BWwEjWBcdysUpSRKjNZ2sso%2BATWq54WZ6o53ovNkBir7nwJ5Msfk%2B%2FkrLtP94%2FlK3w%2FF5wN2uTLV4h%2BfobE4sB28DEa3FYexESXRSyekhaxm%2BRjt3OIdE7ZUzguciS3BWOjvzhrMCrjbAV2CNYNL8QVeRTybGN1utQOvq1jJ7%2FMYrr2YOy%2FCOAO18e6yg7%2FY6pSj9Bc%3D)
+![Diagram](https://viewer.diagrams.net/?highlight=0000ff&edit=_blank&layers=1&nav=1&title=archeture.drawio#Uhttps%3A%2F%2Fraw.githubusercontent.com%2Fonetop21%2FProject0303%2Fmain%2Fdocs%2Fassets%2Farcheture.drawio)
 
 ## 사용 언어 및 도구
 * Flutter
