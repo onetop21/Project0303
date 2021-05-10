@@ -29,7 +29,7 @@
 * 웹애플리케이션
 
 ## 아키텍처
-![[Edit](https://viewer.diagrams.net/?highlight=0000ff&edit=_blank&layers=1&nav=1&title=archeture.drawio#Uhttps%3A%2F%2Fraw.githubusercontent.com%2Fonetop21%2FProject0303%2Fmain%2Fdocs%2Fassets%2Farcheture.drawio)](https://raw.githubusercontent.com/onetop21/Project0303/main/docs/images/archeture.svg)
+[![아키텍쳐](https://raw.githubusercontent.com/onetop21/Project0303/main/docs/images/archeture.svg "아키텍쳐")](https://viewer.diagrams.net/?highlight=0000ff&edit=_blank&layers=1&nav=1&title=archeture.drawio#Uhttps%3A%2F%2Fraw.githubusercontent.com%2Fonetop21%2FProject0303%2Fmain%2Fdocs%2Fassets%2Farcheture.drawio)
 
 ## 사용 언어 및 도구
 * Flutter
