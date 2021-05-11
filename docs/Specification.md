@@ -13,7 +13,7 @@
 * 관리자 로그인 및 비밀번호 변경
 * 사용자 가입 및 로그인 (기본 구독 권한만 보유, 배포 권한 요청시 추가)
 * 배포자
-  * 앨범 생성 (업로더 계정 귀속)
+* 앨범 생성 (업로더 계정 귀속)
   * 앨범에 사진 추가
 * 구독자
   * 기본 설정 진행 (구글 캘린더 연동 등)
@@ -36,8 +36,8 @@
 ## 사용 언어 및 도구
 * Flutter
 * Python
- * FastAPI
-  * OAuth2 (Google?)
+  * FastAPI
+    * OAuth2 (Google?)
  * UVicorn
 * Redis (Cache)
 * Mongo DB
