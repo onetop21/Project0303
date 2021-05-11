@@ -1,2 +1,13 @@
-# Project0303
-Digital Picture Frame WebApp for Sharing Family's Photos Easily.
+# Project0303: 간단한 디지털 액자 프로젝트
+
+## 개요
+NAS 혹은 개인용 간이 서버를 이용하여 쉽게 가족간 사진을 공유할 수 있는 솔루션
+
+## 시스템 요구사항
+
+## 설치 방법
+
+## 사용 방법
+
+** 기타 문의 및 프로젝트 기여(PullRequest, Issue, 아이디어 )는 언제나 환영입니다. **
+
