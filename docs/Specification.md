@@ -74,7 +74,7 @@
 ## Database Schema
 |Collection|Document|비고|
 |---|---|---|
-|user|{_id: ObjectId, username: str, password: str(hashed)}||
+|user|{_id: ObjectId, username: str, password: str(hashed), allow: boolean}||
 |album|{_id: ObjectId, name: str, owner: ObjectID(user._id)}||
 |photo|{_id: ObjectId, bucket: str, path: str, verified: boolean, owner: ObjectId(album._id)}||
 |thumb|{_id: ObjectId, small: str, medium: str, large: str, owner: ObjectId(photo._id)}||
