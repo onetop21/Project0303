@@ -70,3 +70,16 @@
 |슬라이드 정보|GET|/channel/$CHANNEL_ID/slide/$SLIDE_ID|
 |슬라이드 보이기/숨기기|PUT|/channel/$CHANNEL_ID/slide/$SLIDE_ID|
 |채널 삭제|DELETE|/channel/$CHANNEL_ID|
+
+## Database Schema
+|Collection|Document|비고|
+|---|---|---|
+|user|{_id: ObjectId, username: str, password: str(hashed), allow: boolean}||
+|album|{_id: ObjectId, name: str, owner: ObjectID(user._id)}||
+|photo|{_id: ObjectId, bucket: str, path: str, verified: boolean, owner: ObjectId(album._id)}||
+|thumb|{_id: ObjectId, small: str, medium: str, large: str, owner: ObjectId(photo._id)}||
+|channel|{_id: ObjectId, name: str, owner: ObjectId(user._id)}||
+|subscription|{_id: ObjectId, subscribed: ObjectId(album._id), owner: ObjectId(channel._id)}||
+|slide|{_id: ObjectId, photo: ObjectId(photo._id), channel: ObjectId(channel._id), visibility: boolean, owner: ObjectId(subscription._id)}||
+
+
