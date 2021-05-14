@@ -34,16 +34,16 @@ else
 endif
 
 build: ## Build and package project to image.
-	@docker build -t $(LOWER_NAME):latest .
+	@docker build -t onetop21/$(LOWER_NAME):$(GIT_TAG) .
 
-clear: ## Clear built image.
-	@docker rmi $(LOWER_NAME):latest -f >> /dev/null
+clean: ## Clear built image.
+	@docker rmi onetop21/$(LOWER_NAME):$(GIT_TAG) -f >> /dev/null
 
 install: ## Install project to docker.
 	@docker run -d --name minio -p 9000:9000 -e MINIO_ACCESS_KEY=$(UPPER_NAME) -e MINIO_SECRET_KEY=$(UPPER_NAME) minio/minio server /data >> /dev/null
 	@docker run -d --name mongo -p 27017:27017 mongo >> /dev/null
-	@docker run -d --name $(LOWER_NAME) --link minio:minio --link mongo:mongo -p 8080:8080 $(LOWER_NAME) >> /dev/null
-	@echo "\033[1m$(APP_NAME) $(GIT_TAG)[$(GIT_COMMIT)] at http://localhost:8080/\033[0m"
+	@docker run -d --name $(LOWER_NAME) --link minio:minio --link mongo:mongo -p 8080:8080 onetop21/$(LOWER_NAME):$(GIT_TAG) >> /dev/null
+	@echo "\033[1m$(APP_NAME) $(GIT_TAG)[$(GIT_COMMIT)] at http://$(shell hostname -I | awk '{print $$1}'):8080/\033[0m"
 
 uninstall: ## Uninstall project from docker.
 	@echo "Wait a minute..."
