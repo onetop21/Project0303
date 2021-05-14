@@ -1,0 +1,4 @@
+APP_NAME="Project0303"
+VERSION='0.0.1'
+PORT=8080
+DEBUG=True
