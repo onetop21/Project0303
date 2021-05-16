@@ -5,11 +5,18 @@ from bson.objectid import ObjectId
 client: AsyncIOMotorClient = None
 db = None
 
-async def connect():
+async def connect(name, address='mongodb://localhost:27017'):
     global client, db
     if not client:
-        client = AsyncIOMotorClient("mongodb://localhost:27017")
-        db = client['project0303']
+        client = AsyncIOMotorClient(address)
+        db = client[name]
+
+async def create_index():
+    global db
+    if db:
+        collection = db.user
+        result = await collection.create_index('username', unique=True)
+        print(result)
 
 async def disconnect():
     global client, db

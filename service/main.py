@@ -18,15 +18,8 @@ app = FastAPI(
     version=config.VERSION,
 )
 
-app.add_event_handler("startup", dm.connect)
-app.add_event_handler("shutdown", dm.disconnect)
-
-app.mount("/", StaticFiles(directory="frontend/build/web", html=True), name="frontend")
-#@app.get('/')
-#async def home(request: Request):
-#    print('Hello?')
-#    return FileResponse('frontend/build/web/index.html', media_type='text/html')
-
+#app.add_event_handler("startup", dm.connect)
+#app.add_event_handler("shutdown", dm.disconnect)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=['*'],
@@ -35,8 +28,19 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
+@app.on_event('startup')
+async def startup_event():
+    await dm.connect(config.APP_NAME, 'mongodb://localhost:27017')
+    await dm.create_index()
+
+@app.on_event('shutdown')
+async def shutdown_event():
+    dm.disconnect()
+
 #user_auth = Authorization('user')
 #admin_auth = Authorization('admin')
 
 app.include_router(user.router, prefix=API_PREFIX)
                     #dependencies=[Depends(user.verify_auth)])
+app.mount("/", StaticFiles(directory="frontend/build/web", html=True), name="frontend")
+

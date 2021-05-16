@@ -1,3 +1,4 @@
+import sys
 import jwt
 import bcrypt
 from typing import List
@@ -28,7 +29,7 @@ async def get_users():
 @router.post('/user')
 async def signup(user: SignUp):
     hashed_password = passwordContext.hash(user.password)
-    print(user.password, hashed_password)
+    print(user.password, hashed_password, file=sys.stderr)
     # Add to Database
     result = await dm.add_user(user.username, hashed_password)
     print(result)
