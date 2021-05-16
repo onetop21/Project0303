@@ -30,7 +30,7 @@ app.add_middleware(
 
 @app.on_event('startup')
 async def startup_event():
-    await dm.connect(config.APP_NAME, 'mongodb://localhost:27017')
+    await dm.connect(config.APP_NAME.lower(), 'mongodb://mongo:27017')
     await dm.create_index()
 
 @app.on_event('shutdown')

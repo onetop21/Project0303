@@ -15,26 +15,22 @@ passwordContext = CryptContext(schemes = ["bcrypt"], deprecated = "auto")
 
 # 인증 (로그인)
 @router.get('/auth')
-async def login(user):
+async def login():
     pass
 
 # 유저 목록
 @router.get('/user')
 async def get_users():
     result = await dm.get_users()
-    print(result)
-    return result
+    return [{'username': _['username']} for _ in result]
 
 # 가입
 @router.post('/user')
 async def signup(user: SignUp):
     hashed_password = passwordContext.hash(user.password)
-    print(user.password, hashed_password, file=sys.stderr)
     # Add to Database
     result = await dm.add_user(user.username, hashed_password)
-    print(result)
-    print(dir(result))
-    return result.inserted_id
+    return {'message': 'Succeed to signup.'}
 
 # 유저 정보
 @router.get('/user/{username}')

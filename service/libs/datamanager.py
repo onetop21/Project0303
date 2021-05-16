@@ -1,6 +1,10 @@
 import boto3
+from fastapi import HTTPException
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson.objectid import ObjectId
+from pymongo.errors import (
+    DuplicateKeyError
+)
 
 client: AsyncIOMotorClient = None
 db = None
@@ -11,13 +15,6 @@ async def connect(name, address='mongodb://localhost:27017'):
         client = AsyncIOMotorClient(address)
         db = client[name]
 
-async def create_index():
-    global db
-    if db:
-        collection = db.user
-        result = await collection.create_index('username', unique=True)
-        print(result)
-
 async def disconnect():
     global client, db
     if client:
@@ -25,19 +22,38 @@ async def disconnect():
         client = None
         db = None
 
+def mongo(fn):
+    global db
+    async def wrapper(*args, **kwargs):
+        if not db: raise Exception('Database is not connected.')
+        try:
+            return await fn(*args, **kwargs)
+        except DuplicateKeyError as e:
+            raise HTTPException(status_code=409, detail=str(e))
+    return wrapper
+
+@mongo
+async def create_index():
+    collection = db.user
+    result = await collection.create_index('username', unique=True)
+    return result
+
 # User
+@mongo
 async def get_users():
     result = []
     async for doc in db.user.find():
         result.append(doc)
     return result
 
+@mongo
 async def add_user(username: str, password: str):
     result = await db.user.insert_one(
         {'username': username, 'password': password, 'allow': False}
     )
     return result
 
+@mongo
 async def get_user(username: str):
     result = await db.user.find_one(
         {'username': username}

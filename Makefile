@@ -34,7 +34,7 @@ else
 endif
 
 build: ## Build and package project to image.
-	@docker build -t onetop21/$(LOWER_NAME):$(GIT_TAG) .
+	docker build -t onetop21/$(LOWER_NAME):$(GIT_TAG) .
 
 clean: ## Clear built image.
 	@docker rmi onetop21/$(LOWER_NAME):$(GIT_TAG) -f >> /dev/null
@@ -49,6 +49,14 @@ uninstall: ## Uninstall project from docker.
 	@echo "Wait a minute..."
 	@docker stop minio mongo $(LOWER_NAME) | xargs docker rm >> /dev/null
 	@echo "Done."
+
+update: ## Update project to new version.
+	@echo "Wait a minute..."
+	@docker stop $(LOWER_NAME) | xargs docker rm >> /dev/null
+	@docker run -d --name $(LOWER_NAME) --link minio:minio --link mongo:mongo -p 8080:8080 onetop21/$(LOWER_NAME):$(GIT_TAG) >> /dev/null
+
+logs: ## Show logs.
+	@docker logs -f -t $(LOWER_NAME)
 
 version: ## Output the current version
 	@echo "\033[33mGit Version: \033[37m$(GIT_TAG) \033[0m"
