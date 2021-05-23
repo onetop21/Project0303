@@ -1,10 +1,16 @@
-from typing import Any
+from typing import Any, Optional
 from pydantic import BaseModel
 
-class SignUp(BaseModel):
-    username: str
-    password: str
+class BaseUser(BaseModel):
+    username: Optional[str]
+    password: Optional[str]
 
-class SignIn(BaseModel):
-    username: str
-    password: str
+class SignUp(BaseUser):
+    pass
+
+class SignIn(BaseUser):
+    pass
+    
+class UserInfo(BaseUser):
+    role: Optional[str]
+    allow: Optional[bool]

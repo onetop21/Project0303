@@ -7,8 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.logger import logger
 from fastapi.staticfiles import StaticFiles
 #from auth import Authorization
-from routers import user
+from routers import auth, user
 from libs import datamanager as dm
+from authorize import get_router, Verifier
 
 API_PREFIX = '/api/v1'
 
@@ -18,8 +19,6 @@ app = FastAPI(
     version=config.VERSION,
 )
 
-#app.add_event_handler("startup", dm.connect)
-#app.add_event_handler("shutdown", dm.disconnect)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=['*'],
@@ -28,19 +27,22 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
+#app.add_event_handler("startup", dm.connect)
 @app.on_event('startup')
 async def startup_event():
-    await dm.connect(config.APP_NAME.lower(), 'mongodb://mongo:27017')
+    await dm.connect(config.APP_NAME.lower(), f"mongodb://{os.getenv('MONGO_HOST', 'localhost')}:27017")
     await dm.create_index()
+    await dm.add_default_admin()
 
+#app.add_event_handler("shutdown", dm.disconnect)
 @app.on_event('shutdown')
 async def shutdown_event():
-    dm.disconnect()
+    await dm.disconnect()
 
-#user_auth = Authorization('user')
-#admin_auth = Authorization('admin')
-
-app.include_router(user.router, prefix=API_PREFIX)
-                    #dependencies=[Depends(user.verify_auth)])
-app.mount("/", StaticFiles(directory="frontend/build/web", html=True), name="frontend")
+app.include_router(get_router(), prefix=API_PREFIX)
+app.include_router(get_router('user'), prefix=API_PREFIX,
+                    dependencies=[Depends(Verifier('user').verify)])
+app.include_router(get_router('admin'), prefix=API_PREFIX,
+                    dependencies=[Depends(Verifier('admin').verify)])
+app.mount("/", StaticFiles(directory='frontend/build/web', html=True), name="frontend")
 

@@ -1,27 +1,36 @@
+import sys
 from typing import List
-from fastapi import APIRouter, Query, Header, HTTPException
-from project0303.service.models.auth import TokenRequest
-from project0303.service.libs.auth import generate_user_token
-from project0303.service.libs.auth import decode_token, verify_token
+from fastapi import Depends, Query, Header, HTTPException
+from fastapi.responses import JSONResponse
+from authorize import get_router, create_token, hash_password, verify_password
+from models.user import SignUp, SignIn, UserInfo
+from libs import datamanager as dm
 
-admin_router = APIRouter()
-user_router = APIRouter()
+router = get_router()
 
-import bcrypt
-import jwp
-
-@admin_router.post("/auth")
-def create_token(req: TokenRequest):
-    username = req.username
-    user_token = generate_user_token(username)
-    return {'token': user_token}
-
-@user_router.get("/user/auth")
-def verify_user(user_token: str = Header(...)):
-    decoded = decode_token(user_token)
-    res = verify_token(decoded)
-    if res:
-        del decoded['hash_key']
-        return {'result': res, 'data': decoded}
+# 인증 (로그인)
+@router.post('/signin')
+async def login(user: SignIn):
+    result = await dm.get_user(user.username)
+    if result:
+        is_verified = verify_password(user.password, result['password'])
+        if not is_verified:
+            return JSONResponse(status_code=401, content=dict(message="Failed to authenticate."))
+        user_info = UserInfo(**result)
+        #user_info.username = result['username']
+        #user_info.password = result['password']
+        #user_info.role = result['role']
+        #user_info.allow = result['allow']
+        return {'Authorization': f"Bearer {create_token(user_info)}"}
     else:
-        return {'result': res}
+        return JSONResponse(status_code=404, content=dict(message="Cannot find username."))
+
+# 가입
+@router.post('/signup')
+async def signup(user: SignUp):
+    # Add to Database
+    result = await dm.add_user(user.username, hash_password(user.password))
+    return {'message': 'Succeed to signup.'}
+
+
+

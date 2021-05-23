@@ -33,27 +33,49 @@ else
 	@echo "     \033[33mPlease visit https://docs.docker.com/get-docker/ and install docker.\033[0m"
 endif
 
+debug: ## Build project and run on local environment.
+	@cd frontend;flutter build web --release
+	@python service
+    
 build: ## Build and package project to image.
-	docker build -t onetop21/$(LOWER_NAME):$(GIT_TAG) .
+	@docker build -t onetop21/$(LOWER_NAME):$(GIT_TAG) .
 
 clean: ## Clear built image.
 	@docker rmi onetop21/$(LOWER_NAME):$(GIT_TAG) -f >> /dev/null
 
-install: ## Install project to docker.
+db-start: ## Start databases on docker.
 	@docker run -d --name minio -p 9000:9000 -e MINIO_ACCESS_KEY=$(UPPER_NAME) -e MINIO_SECRET_KEY=$(UPPER_NAME) minio/minio server /data >> /dev/null
 	@docker run -d --name mongo -p 27017:27017 mongo >> /dev/null
-	@docker run -d --name $(LOWER_NAME) --link minio:minio --link mongo:mongo -p 8080:8080 onetop21/$(LOWER_NAME):$(GIT_TAG) >> /dev/null
+
+db-resume: ## Resume databases on docker.
+	@docker start minio mongo
+
+db-status: ## Show status of databases.
+	@docker ps --filter name=mongo --filter name=minio
+
+db-pause: ## Pause databases on docker.
+	@echo "Wait a minute..."
+	@docker stop minio mongo >> /dev/null
+	echo "Done."
+
+db-stop: ## Stop databases on docker.
+	@echo "Wait a minute..."
+	@docker stop minio mongo | xargs docker rm >> /dev/null
+	@echo "Done."
+
+install: ## Install project to docker.
+	@docker run -d --name $(LOWER_NAME) -e MONGO_HOST=mongo --link minio:minio --link mongo:mongo -p 8080:8080 onetop21/$(LOWER_NAME):$(GIT_TAG) >> /dev/null
 	@echo "\033[1m$(APP_NAME) $(GIT_TAG)[$(GIT_COMMIT)] at http://$(shell hostname -I | awk '{print $$1}'):8080/\033[0m"
 
 uninstall: ## Uninstall project from docker.
 	@echo "Wait a minute..."
-	@docker stop minio mongo $(LOWER_NAME) | xargs docker rm >> /dev/null
+	@docker stop $(LOWER_NAME) | xargs docker rm >> /dev/null
 	@echo "Done."
 
 update: ## Update project to new version.
 	@echo "Wait a minute..."
 	@docker stop $(LOWER_NAME) | xargs docker rm >> /dev/null
-	@docker run -d --name $(LOWER_NAME) --link minio:minio --link mongo:mongo -p 8080:8080 onetop21/$(LOWER_NAME):$(GIT_TAG) >> /dev/null
+	@docker run -d --name $(LOWER_NAME) -e MONGO_HOST=mongo --link minio:minio --link mongo:mongo -p 8080:8080 onetop21/$(LOWER_NAME):$(GIT_TAG) >> /dev/null
 
 logs: ## Show logs.
 	@docker logs -f -t $(LOWER_NAME)

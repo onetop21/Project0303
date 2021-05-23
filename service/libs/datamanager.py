@@ -5,6 +5,7 @@ from bson.objectid import ObjectId
 from pymongo.errors import (
     DuplicateKeyError
 )
+from authorize import hash_password
 
 client: AsyncIOMotorClient = None
 db = None
@@ -38,6 +39,13 @@ async def create_index():
     result = await collection.create_index('username', unique=True)
     return result
 
+@mongo
+async def add_default_admin():
+    if not await db.user.find_one({'username': 'admin'}):
+        result = await db.user.insert_one(
+            {'username': 'admin', 'password': hash_password(''), 'role': 'admin', 'allow': True}
+        )
+        print('Added default admin account. Please change password first.')
 # User
 @mongo
 async def get_users():
@@ -49,7 +57,7 @@ async def get_users():
 @mongo
 async def add_user(username: str, password: str):
     result = await db.user.insert_one(
-        {'username': username, 'password': password, 'allow': False}
+        {'username': username, 'password': password, 'role': 'user', 'allow': False}
     )
     return result
 
@@ -60,6 +68,7 @@ async def get_user(username: str):
     )
     return result
 
+@mongo
 async def allow_user(username: str, allow: bool=True):
     result = await db.user.update_one(
         {'username': username}, 
@@ -67,6 +76,7 @@ async def allow_user(username: str, allow: bool=True):
     )
     return result
 
+@mongo
 async def change_password(username: str, password: str):
     result = await db.user.update_one(
         {'username': username},
@@ -74,6 +84,7 @@ async def change_password(username: str, password: str):
     )
     return result
 
+@mongo
 async def del_user(username: str):
     result = await db.user.delete_one(
         {'username': username}
@@ -81,24 +92,28 @@ async def del_user(username: str):
     return result
 
 # Album
+@mongo
 async def get_albums(user_id: ObjectId):
     result = await db.album.find(
         {'owner': user_id}
     )
     return result
 
+@mongo
 async def create_album(user_id: ObjectId, name: str):
     result = await db.album.insert_one(
         {'name': name, 'owner': user_id}
     )
     return result
 
+@mongo
 async def get_album(id: ObjectId):
     result = await db.album.find_one(
         {'_id': id}
     )
     return result
 
+@mongo
 async def del_album(id: ObjectId):
     result = await db.album.delete_one(
         {'_id': id}
@@ -106,12 +121,14 @@ async def del_album(id: ObjectId):
     return result
 
 # Photo
+@mongo
 async def get_photos(album_id: ObjectId):
     result = await db.photo.find(
         {'owner': album_id}
     )
     return result
 
+@mongo
 async def get_photo(id: ObjectId):
     result = await db.photo.find_one(
         {'_id': id}
