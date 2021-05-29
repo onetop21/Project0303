@@ -47,18 +47,22 @@
 ## API
 |기능|메소드|API|HEADER|BODY|
 |---|---|---|---|---|
-|유저 인증 요청(토큰 발급)|GET|/auth|
+|유저 인증 요청(토큰 발급)|GET|/signin|
+|가입|POST|/signup|
 |유저 목록|GET|/user|
-|가입|POST|/user|
 |유저 정보|GET|/user/$USERNAME|
 |유저 갱신|PUT|/user/$USERNAME|
-|탈퇴(계정 소멸)|DELETE|/user/$USERNAME|
+|유저 삭제|DELETE|/user/$USERNAME|
+|내 정보|GET|/user/me|
+|내 정보 갱신|PUT|/user/me|
+|탈퇴|DELETE|/user/me|
 |앨범 목록|GET|/album|
 |앨범 생성|POST|/album|
 |앨범 다운로드|GET|/album/$ALBUM_ID/bundle|
 |토큰 발급|GET|/album/$ALBUM_ID/token|
 |사진 목록|GET|/album/$ALBUM_ID/photo|
 |사진 추가(업로드)|POST|/album/$ALBUM_ID/photo|
+|사진 가져오기|GET|/album/$ALBUM_ID/photo/$PHOTO_ID|
 |사진 삭제|DELETE|/album/$ALBUM_ID/photo/$PHOTO_ID|
 |앨범 삭제|DELETE|/album/$ALBUM_ID|
 |채널 목록|GET|/channel|
