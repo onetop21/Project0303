@@ -6,3 +6,4 @@ motor==2.4.0
 boto3==1.17.72
 aiofiles==0.6.0
 uvicorn==0.13.4
+python-multipart==0.0.5

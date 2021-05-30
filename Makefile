@@ -44,7 +44,7 @@ clean: ## Clear built image.
 	@docker rmi onetop21/$(LOWER_NAME):$(GIT_TAG) -f >> /dev/null
 
 db-start: ## Start databases on docker.
-	@docker run -d --name minio -p 9000:9000 -e MINIO_ACCESS_KEY=$(UPPER_NAME) -e MINIO_SECRET_KEY=$(UPPER_NAME) minio/minio server /data >> /dev/null
+	@docker run -d --name minio -p 9000:9000 -e MINIO_ACCESS_KEY=$(UPPER_NAME) -e MINIO_SECRET_KEY=$(UPPER_NAME)-SECRET minio/minio server /data >> /dev/null
 	@docker run -d --name mongo -p 27017:27017 mongo >> /dev/null
 
 db-resume: ## Resume databases on docker.
@@ -64,7 +64,7 @@ db-stop: ## Stop databases on docker.
 	@echo "Done."
 
 install: ## Install project to docker.
-	@docker run -d --name $(LOWER_NAME) -e MONGO_HOST=mongo --link minio:minio --link mongo:mongo -p 8080:8080 onetop21/$(LOWER_NAME):$(GIT_TAG) >> /dev/null
+	@docker run -d --name $(LOWER_NAME) -e MONGO_HOST=mongo -e S3_HOST=minio --link minio:minio --link mongo:mongo -p 8080:8080 onetop21/$(LOWER_NAME):$(GIT_TAG) >> /dev/null
 	@echo "\033[1m$(APP_NAME) $(GIT_TAG)[$(GIT_COMMIT)] at http://$(shell hostname -I | awk '{print $$1}'):8080/\033[0m"
 
 uninstall: ## Uninstall project from docker.
@@ -75,7 +75,7 @@ uninstall: ## Uninstall project from docker.
 update: ## Update project to new version.
 	@echo "Wait a minute..."
 	@docker stop $(LOWER_NAME) | xargs docker rm >> /dev/null
-	@docker run -d --name $(LOWER_NAME) -e MONGO_HOST=mongo --link minio:minio --link mongo:mongo -p 8080:8080 onetop21/$(LOWER_NAME):$(GIT_TAG) >> /dev/null
+	@docker run -d --name $(LOWER_NAME) -e MONGO_HOST=mongo -e S3_HOST=minio --link minio:minio --link mongo:mongo -p 8080:8080 onetop21/$(LOWER_NAME):$(GIT_TAG) >> /dev/null
 
 logs: ## Show logs.
 	@docker logs -f -t $(LOWER_NAME)

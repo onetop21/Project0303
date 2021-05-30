@@ -1,20 +1,33 @@
-import boto3
 from fastapi import HTTPException
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson.objectid import ObjectId
 from pymongo.errors import (
     DuplicateKeyError
 )
+import boto3
+from botocore.client import Config
 from authorize import hash_password
 
 client: AsyncIOMotorClient = None
 db = None
+s3 = None
 
-async def connect(name, address='mongodb://localhost:27017'):
-    global client, db
+async def connect(name, 
+        mongo_addr='mongodb://localhost:27017', s3_endpoint='http://localhost:9000',
+        access_key='PROJECT0303', secret_key='PROJECT0303-SECRET'):
+    global client, db, s3
     if not client:
-        client = AsyncIOMotorClient(address)
+        client = AsyncIOMotorClient(mongo_addr)
         db = client[name]
+    if not s3:
+        s3 = boto3.resource('s3',
+            endpoint_url=s3_endpoint,
+            aws_access_key_id=access_key,
+            aws_secret_access_key=secret_key,
+            config=Config(signature_version='s3v4'),
+            region_name='us-east-1')
+        if not s3:
+            raise HTTPException('500', 'S3 Connect Failed.')
 
 async def disconnect():
     global client, db
@@ -22,6 +35,8 @@ async def disconnect():
         client.close()
         client = None
         db = None
+    if s3:
+        s3 = None
 
 def mongo(fn):
     global db
@@ -94,9 +109,9 @@ async def del_user(username: str):
 # Album
 @mongo
 async def get_albums(user_id: ObjectId):
-    result = await db.album.find(
-        {'owner': user_id}
-    )
+    result = []
+    async for doc in db.album.find({'owner': user_id}):
+        result.append(doc)
     return result
 
 @mongo
@@ -123,14 +138,25 @@ async def del_album(id: ObjectId):
 # Photo
 @mongo
 async def get_photos(album_id: ObjectId):
-    result = await db.photo.find(
-        {'owner': album_id}
-    )
+    result = []
+    async for doc in db.photo.find({'owner': album_id}):
+        result.append(doc)
     return result
+
+@mongo
+async def add_photo(album_id: ObjectId, filename: str, blob: bytes):
+    pass
 
 @mongo
 async def get_photo(id: ObjectId):
     result = await db.photo.find_one(
+        {'_id': id}
+    )
+    return result
+
+@mongo
+async def del_photo(id: ObjectId):
+    result = await db.photo.delete_one(
         {'_id': id}
     )
     return result

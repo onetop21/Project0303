@@ -18,11 +18,7 @@ def get_router(role: str=BASE_ROLE):
     return router
 
 def create_token(user_info: UserInfo):
-    return jwt.encode({
-        'username': user_info.username,
-        'allow': user_info.allow,
-        'role': user_info.role,
-    }, SECRET, algorithm=ALGORITHM)
+    return jwt.encode(user_info.dict(exclude={'password'}), SECRET, algorithm=ALGORITHM)
 
 def hash_password(password: str):
     return passwordContext.hash(password)
@@ -32,8 +28,8 @@ def verify_password(secret: str, hash: str):
     return bcrypt.checkpw(secret.encode(), hash.encode())
 
 class Verifier:
-    def __init__(self, role: str=BASE_ROLE):
-        self._role = role
+    def __init__(self, roles: List[str]=[BASE_ROLE]):
+        self._roles = roles if isinstance(roles, list) else [roles]
 
     async def verify(self, credentials: HTTPAuthorizationCredentials = Security(security)):
         print( {"scheme": credentials.scheme, "credentials": credentials.credentials})
@@ -41,7 +37,7 @@ class Verifier:
             try:
                 decoded = jwt.decode(credentials.credentials, SECRET, algorithms=[ALGORITHM])
                 if decoded['allow']:
-                    if decoded['role'] == self._role:
+                    if decoded['role'] in self._roles:
                         return decoded
                     else:
                         raise HTTPException(401, "Role is not matched.")

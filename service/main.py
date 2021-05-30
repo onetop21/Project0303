@@ -6,8 +6,7 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.logger import logger
 from fastapi.staticfiles import StaticFiles
-#from auth import Authorization
-from routers import auth, user
+from routers import auth, user, album
 from libs import datamanager as dm
 from authorize import get_router, Verifier
 
@@ -30,7 +29,9 @@ app.add_middleware(
 #app.add_event_handler("startup", dm.connect)
 @app.on_event('startup')
 async def startup_event():
-    await dm.connect(config.APP_NAME.lower(), f"mongodb://{os.getenv('MONGO_HOST', 'localhost')}:27017")
+    await dm.connect(config.APP_NAME.lower(), 
+        mongo_addr=f"mongodb://{os.getenv('MONGO_HOST', 'localhost')}:27017",
+        s3_endpoint=f"http://{os.getenv('S3_HOST', 'localhost')}:9000")
     await dm.create_index()
     await dm.add_default_admin()
 
@@ -41,8 +42,8 @@ async def shutdown_event():
 
 app.include_router(get_router(), prefix=API_PREFIX)
 app.include_router(get_router('user'), prefix=API_PREFIX,
-                    dependencies=[Depends(Verifier('user').verify)])
+                    dependencies=[Depends(Verifier(['user', 'admin']).verify)])
 app.include_router(get_router('admin'), prefix=API_PREFIX,
-                    dependencies=[Depends(Verifier('admin').verify)])
+                    dependencies=[Depends(Verifier(['admin']).verify)])
 app.mount("/", StaticFiles(directory='frontend/build/web', html=True), name="frontend")
 
