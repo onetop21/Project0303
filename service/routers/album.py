@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from passlib.context import CryptContext
 from bson.objectid import ObjectId
 from authorize import Verifier, get_router, create_token, hash_password
-from models.user import SignUp, SignIn, UserInfo
+from models.user import SignUpModel, SignInModel, InfoModel, UpdateModel
 from libs import datamanager as dm
 
 router = get_router()

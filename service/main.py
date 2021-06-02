@@ -26,7 +26,6 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
-#app.add_event_handler("startup", dm.connect)
 @app.on_event('startup')
 async def startup_event():
     await dm.connect(config.APP_NAME.lower(), 
@@ -35,7 +34,6 @@ async def startup_event():
     await dm.create_index()
     await dm.add_default_admin()
 
-#app.add_event_handler("shutdown", dm.disconnect)
 @app.on_event('shutdown')
 async def shutdown_event():
     await dm.disconnect()

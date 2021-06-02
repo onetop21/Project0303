@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import HTTPException, Header, APIRouter, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from passlib.context import CryptContext
-from models.user import UserInfo
+from models.user import UpdateModel, InfoModel
 
 SECRET = "56090b7630b643b48d3beaf05e699c1c"
 ALGORITHM = 'HS256'
@@ -17,7 +17,7 @@ def get_router(role: str=BASE_ROLE):
     router = _router[role] = _router.get(role, APIRouter())
     return router
 
-def create_token(user_info: UserInfo):
+def create_token(user_info: InfoModel.User):
     return jwt.encode(user_info.dict(exclude={'password'}), SECRET, algorithm=ALGORITHM)
 
 def hash_password(password: str):

@@ -7,7 +7,7 @@ class DBSchema(BaseModel):
     role: Optional[str]
     allow: Optional[bool]
 
-class SignUpSchema(BaseModel):
+class SignUpModel(BaseModel):
     username: str = Field(...)
     password: str = Field(...)
     class Config:
@@ -18,7 +18,7 @@ class SignUpSchema(BaseModel):
             }
         }
 
-class SignInSchema(BaseModel):
+class SignInModel(BaseModel):
     username: str = Field(...)
     password: str = Field(...)
     class Config:
@@ -29,8 +29,8 @@ class SignInSchema(BaseModel):
             }
         }
 
-class Admin:
-    class InfoSchema(BaseModel):
+class InfoModel:
+    class Admin(BaseModel):
         username: str = Field(...)
         role: str = Field(...)
         allow: bool = Field(...)
@@ -43,7 +43,19 @@ class Admin:
                 }
             }
 
-    class UpdateSchema(BaseModel):
+    class User(BaseModel):
+        username: str = Field(...)
+        role: str = Field(...)
+        class Config:
+            schema_extra = {
+                "example": {
+                    "username": "John Doe",
+                    "role": "abcdefg",
+                }
+            }
+
+class UpdateModel:
+    class Admin(BaseModel):
         password: Optional[str]
         role: Optional[str]
         allow: Optional[bool]
@@ -56,19 +68,7 @@ class Admin:
                 }
             }
 
-class User:
-    class InfoSchema(BaseModel):
-        username: str = Field(...)
-        role: str = Field(...)
-        class Config:
-            schema_extra = {
-                "example": {
-                    "username": "John Doe",
-                    "role": "abcdefg",
-                }
-            }
-
-    class UpdateSchema(BaseModel):
+    class User(BaseModel):
         password: Optional[str]
         class Config:
             schema_extra = {
