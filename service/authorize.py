@@ -1,6 +1,6 @@
 import jwt
 from typing import List, Optional
-from fastapi import HTTPException, Header, APIRouter, Security
+from fastapi import HTTPException, Header, Depends, APIRouter, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from passlib.context import CryptContext
 from models.user import UpdateModel, InfoModel
@@ -17,8 +17,8 @@ def get_router(role: str=BASE_ROLE):
     router = _router[role] = _router.get(role, APIRouter())
     return router
 
-def create_token(user_info: InfoModel.User):
-    return jwt.encode(user_info.dict(exclude={'password'}), SECRET, algorithm=ALGORITHM)
+def create_token(user_info: InfoModel):
+    return jwt.encode(user_info.dict(), SECRET, algorithm=ALGORITHM)
 
 def hash_password(password: str):
     return passwordContext.hash(password)
@@ -26,6 +26,9 @@ def hash_password(password: str):
 def verify_password(secret: str, hash: str):
     return passwordContext.verify(secret, hash)
     return bcrypt.checkpw(secret.encode(), hash.encode())
+
+def user_token(*args):
+    return Depends(Verifier(list(args)).verify)
 
 class Verifier:
     def __init__(self, roles: List[str]=[BASE_ROLE]):
@@ -36,6 +39,7 @@ class Verifier:
         if credentials.scheme.lower() == 'bearer':
             try:
                 decoded = jwt.decode(credentials.credentials, SECRET, algorithms=[ALGORITHM])
+                print(decoded, self._roles)
                 if decoded['allow']:
                     if decoded['role'] in self._roles:
                         return decoded

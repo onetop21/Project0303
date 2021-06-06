@@ -5,33 +5,34 @@ from typing import List
 from fastapi import Depends, Query, Header, HTTPException
 from fastapi.responses import JSONResponse
 from passlib.context import CryptContext
-from authorize import Verifier, get_router, create_token, hash_password
+from authorize import Verifier, get_router, create_token, hash_password, user_token
 from models.user import SignUpModel, SignInModel, InfoModel, UpdateModel
 from libs import datamanager as dm
 
 router = get_router()
 admin_router = get_router('admin')
 user_router = get_router('user')
+tags = ["User"]
 
 # 유저 목록
-@admin_router.get('/user')
+@admin_router.get('/user', tags=tags)
 async def get_users():
     result = await dm.get_users()
     return [{'username': _['username']} for _ in result]
 
 # 유저 정보
-@admin_router.get('/user/{username}')
+@admin_router.get('/user/{username}', tags=tags)
 async def get_user_info(username: str):
     result = await dm.get_user(username)
     if result:
-        user_info = UserInfo(**result)
+        user_info = InfoModel(**result)
         return user_info.dict(exclude={'password'})
     else:
         raise HTTPException(404, "Cannot find user.")
 
 # 유저 갱신
-@admin_router.put('/user/{username}')
-async def update_user_info(username: str, user_info: InfoModel.Admin):
+@admin_router.put('/user/{username}', tags=tags)
+async def update_user_info(username: str, user_info: UpdateModel.Admin):
     result = await dm.get_user(username)
     if result:
         update_properties = []
@@ -49,7 +50,7 @@ async def update_user_info(username: str, user_info: InfoModel.Admin):
         raise HTTPException(404, "Cannot find user.")
 
 # 탈퇴
-@admin_router.delete('/user/{username}')
+@admin_router.delete('/user/{username}', tags=tags)
 async def leave(username: str):
     result = await dm.get_user(username)
     if result:
@@ -60,16 +61,15 @@ async def leave(username: str):
         return JSONResponse('Deleted.', 200)
     else:
         raise HTTPException(404, "Cannot find user.")
-
-
+        
 # 본인 정보
-@router.get('/user/me')
-async def get_my_info(user_token=Depends(Verifier(['user', 'admin']).verify)):
+@router.get('/user/me', tags=tags)
+async def get_my_info(user_token=user_token('user', 'admin')):
     return JSONResponse(user_token, 200)
 
 # 본인 정보 갱신
-@router.put('/user/me')
-async def update_my_info(user_info: InfoModel.User, user_token=Depends(Verifier(['user', 'admin']).verify)):
+@router.put('/user/me', tags=tags)
+async def update_my_info(user_info: UpdateModel.User, user_token=user_token('user', 'admin')):
     update_properties = []
     if user_info.password:
         await dm.change_password(user_token['username'], hash_password(user_info.password))
@@ -83,8 +83,8 @@ async def update_my_info(user_info: InfoModel.User, user_token=Depends(Verifier(
     return JSONResponse(f'Updated. {update_properties}', 200)
 
 # 탈퇴
-@router.delete('/user/me')
-async def leave(user_token=Depends(Verifier(['user', 'admin']).verify)):
+@router.delete('/user/me', tags=tags)
+async def leave(user_token=user_token('user', 'admin')):
     if user_token['role'] != 'admin':
         result = await dm.del_user(user_token['username'])
     else:

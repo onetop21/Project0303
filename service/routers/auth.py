@@ -3,7 +3,7 @@ from typing import List
 from fastapi import Depends, Query, Header, HTTPException
 from fastapi.responses import JSONResponse
 from authorize import get_router, create_token, hash_password, verify_password
-from models.user import SignUpModel, SignInModel, InfoModel, UpdateModel
+from models.user import SignUpModel, SignInModel, InfoModel
 from libs import datamanager as dm
 
 router = get_router()
@@ -17,7 +17,7 @@ async def login(user: SignInModel):
         is_verified = verify_password(user.password, result['password'])
         if not is_verified:
             return JSONResponse(status_code=401, content=dict(message="Failed to authenticate."))
-        return {'Authorization': f"Bearer {create_token(InfoModel.User(**result))}"}
+        return {'Authorization': f"Bearer {create_token(InfoModel(**result))}"}
     else:
         return JSONResponse(status_code=404, content=dict(message="Cannot find username."))
 

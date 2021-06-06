@@ -29,30 +29,18 @@ class SignInModel(BaseModel):
             }
         }
 
-class InfoModel:
-    class Admin(BaseModel):
-        username: str = Field(...)
-        role: str = Field(...)
-        allow: bool = Field(...)
-        class Config:
-            schema_extra = {
-                "example": {
-                    "username": "John Doe",
-                    "role": "abcdefg",
-                    "allow": True
-                }
+class InfoModel(BaseModel):
+    username: str = Field(...)
+    role: str = Field(...)
+    allow: bool = Field(...)
+    class Config:
+        schema_extra = {
+            "example": {
+                "username": "John Doe",
+                "role": "abcdefg",
+                "allow": True
             }
-
-    class User(BaseModel):
-        username: str = Field(...)
-        role: str = Field(...)
-        class Config:
-            schema_extra = {
-                "example": {
-                    "username": "John Doe",
-                    "role": "abcdefg",
-                }
-            }
+        }
 
 class UpdateModel:
     class Admin(BaseModel):
