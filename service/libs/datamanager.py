@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+from fastapi.logger import logger
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson.objectid import ObjectId
 from pymongo.errors import (
@@ -28,6 +29,8 @@ async def connect(name,
             region_name='us-east-1')
         if not s3:
             raise HTTPException('500', 'S3 Connect Failed.')
+        else:
+            print('Succeed to connect S3.')
 
 async def disconnect():
     global client, db
@@ -145,7 +148,19 @@ async def get_photos(album_id: ObjectId):
 
 @mongo
 async def add_photo(album_id: ObjectId, filename: str, blob: bytes):
-    pass
+    album_info = await get_album(album_id)
+    user_info = await get_user(album_info['owner'])
+    bucket = '_project0303_'
+    path = f"{user_info['username']}/{album_info['name']}/{filename}"
+    object = s3.Object(bucket, path)
+    object.put(Body=blob)
+    result = await db.photo.insert_one({
+        'bucket': bucket,
+        'path': path,
+        'verified': True,
+        'owner': album_id,
+    })
+    return result
 
 @mongo
 async def get_photo(id: ObjectId):

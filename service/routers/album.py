@@ -54,7 +54,7 @@ async def get_photos():
 @user_router.post('/album/{album_id}/photo', tags=tags)
 async def add_photo(album_id: str, file: UploadFile = File(...)):
     content = await file.read()
-    dm.add_photo(album_id, file.filename, content)
+    dm.add_photo(album_id, username, file.filename, content)
 
 # 사진 가져오기
 @user_router.get('/album/{album_id}/photo/{photo_id}', tags=tags)
