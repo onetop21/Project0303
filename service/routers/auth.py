@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from authorize import get_router, create_token, hash_password, verify_password
 from models.user import SignUpModel, SignInModel, InfoModel
 from libs import datamanager as dm
+from libs import exception
 
 router = get_router()
 tags = ["Authentication"]
@@ -16,10 +17,10 @@ async def login(user: SignInModel):
     if result:
         is_verified = verify_password(user.password, result['password'])
         if not is_verified:
-            return JSONResponse(status_code=401, content=dict(message="Failed to authenticate."))
+            raise exception.FailAuthentcateError()
         return {'Authorization': f"Bearer {create_token(InfoModel(**result))}"}
     else:
-        return JSONResponse(status_code=404, content=dict(message="Cannot find username."))
+        raise exception.NotFoundError('Cannot find username.')
 
 # 가입
 @router.post('/signup', tags=tags)

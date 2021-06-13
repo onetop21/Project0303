@@ -4,6 +4,7 @@ from fastapi import HTTPException, Header, Depends, APIRouter, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from passlib.context import CryptContext
 from models.user import UpdateModel, InfoModel
+from libs import exception
 
 SECRET = "56090b7630b643b48d3beaf05e699c1c"
 ALGORITHM = 'HS256'
@@ -35,25 +36,24 @@ class Verifier:
         self._roles = roles if isinstance(roles, list) else [roles]
 
     async def verify(self, credentials: HTTPAuthorizationCredentials = Security(security)):
-        print( {"scheme": credentials.scheme, "credentials": credentials.credentials})
+        #print( {"scheme": credentials.scheme, "credentials": credentials.credentials})
         if credentials.scheme.lower() == 'bearer':
             try:
                 decoded = jwt.decode(credentials.credentials, SECRET, algorithms=[ALGORITHM])
-                print(decoded, self._roles)
                 if decoded['allow']:
                     if decoded['role'] in self._roles:
                         return decoded
                     else:
-                        raise HTTPException(401, "Role is not matched.")
+                        raise exception.FailAuthentcateError("Role is not matched.")
                 else:
-                    raise HTTPException(405, "Please contact to administrator.")
+                    raise exception.NotAllowedError("Please contact to administrator.")
             except jwt.exceptions.InvalidSignatureError as e:
-                raise HTTPException(401, f"{e}")
+                raise exception.FailAuthentcateError(f"{e}")
             except jwt.exceptions.InvalidTokenError as e:
-                raise HTTPException(401, f"{e}")
+                raise exception.FailAuthentcateError(f"{e}")
             except Exception as e:
                 raise e
         else:
-            raise HTTPException(401, "Invalid token scheme.")
+            raise exception.FailAuthentcateError("Invalid token scheme.")
         
 

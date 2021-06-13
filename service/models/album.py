@@ -1,12 +1,30 @@
 from typing import Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, BaseConfig, Field
+from bson.objectid import ObjectId
 
-class AlbumModel(BaseModel):
-    _id: str = Field(...)
-    owner: str = Field(...)
+class PydanticObjectId(str):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        if not isinstance(v, ObjectId):
+            raise TypeError('ObjectId required')
+        return str(v)
+
+class MongoSchema(BaseModel):
+    id: PydanticObjectId = Field(..., alias='_id')
+    class Config(BaseConfig):
+        json_encoders = {
+            PydanticObjectId: lambda x: ObjectId(x)
+        }
+
+class AlbumModel(MongoSchema):
+    owner: PydanticObjectId = Field(...)
     name: str = Field(...)
 
-class CreateModel(BaseModel):
+class CreateAlbumModel(BaseModel):
     album_name: str = Field(...)
     class Config:
         schema_extra = {
@@ -14,3 +32,10 @@ class CreateModel(BaseModel):
                 "album_name": "new-name",
             }
         }
+    
+class PhotoModel(MongoSchema):
+    bucket: str = Field(...)
+    path: str = Field(...)
+    verified: bool = Field(...)
+    owner: PydanticObjectId = Field(...)
+    

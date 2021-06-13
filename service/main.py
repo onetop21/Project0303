@@ -32,6 +32,7 @@ async def startup_event():
         mongo_addr=f"mongodb://{os.getenv('MONGO_HOST', 'localhost')}:27017",
         s3_endpoint=f"http://{os.getenv('S3_HOST', 'localhost')}:9000")
     await dm.create_index()
+    await dm.create_bucket()
     await dm.add_default_admin()
 
 @app.on_event('shutdown')

@@ -1,3 +1,4 @@
+import uuid
 from fastapi import HTTPException
 from fastapi.logger import logger
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -6,9 +7,11 @@ from pymongo.errors import (
     DuplicateKeyError
 )
 import boto3
-from botocore.client import Config
+from botocore.client import Config, ClientError
 from authorize import hash_password
+from libs import exception
 
+BUCKET_NAME = 'project0303-data'
 client: AsyncIOMotorClient = None
 db = None
 s3 = None
@@ -57,6 +60,13 @@ async def create_index():
     result = await collection.create_index('username', unique=True)
     return result
 
+async def create_bucket():
+    try:
+        s3.meta.client.head_bucket(Bucket=BUCKET_NAME)
+    except ClientError:
+        # The bucket does not exist or you have no access.
+        s3.create_bucket(Bucket=BUCKET_NAME)
+
 @mongo
 async def add_default_admin():
     if not await db.user.find_one({'username': 'admin'}):
@@ -83,6 +93,13 @@ async def add_user(username: str, password: str):
 async def get_user(username: str):
     result = await db.user.find_one(
         {'username': username}
+    )
+    return result
+
+@mongo
+async def get_user_by_id(id: ObjectId):
+    result = await db.user.find_one(
+        {'_id': id}
     )
     return result
 
@@ -133,6 +150,9 @@ async def get_album(id: ObjectId):
 
 @mongo
 async def del_album(id: ObjectId):
+    photos = await get_photos(id)
+    if photos:
+        raise exception.NotAllowedError('Not Empty Album.')
     result = await db.album.delete_one(
         {'_id': id}
     )
@@ -149,13 +169,16 @@ async def get_photos(album_id: ObjectId):
 @mongo
 async def add_photo(album_id: ObjectId, filename: str, blob: bytes):
     album_info = await get_album(album_id)
-    user_info = await get_user(album_info['owner'])
-    bucket = '_project0303_'
-    path = f"{user_info['username']}/{album_info['name']}/{filename}"
-    object = s3.Object(bucket, path)
+    if not album_info:
+        raise exception.NotFoundError('Cannot find album.')
+    user_info = await get_user_by_id(album_info['owner'])
+    if not user_info:
+        raise exception.NotFoundError('Cannot find owner user.')
+    path = f"{user_info['username']}/{album_info['_id']}/{uuid.uuid4().hex}{os.path.splitext(filename)[-1]}"
+    object = s3.Object(BUCKET_NAME, path)
     object.put(Body=blob)
     result = await db.photo.insert_one({
-        'bucket': bucket,
+        'bucket': BUCKET_NAME,
         'path': path,
         'verified': True,
         'owner': album_id,
